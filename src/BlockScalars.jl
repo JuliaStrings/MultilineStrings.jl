@@ -24,7 +24,7 @@ function block(str::AbstractString, block_scalar::AbstractString="")
     end
 
     out = IOBuffer()
-    ending = IOBuffer()
+    num_newlines = 0
 
     if style == 'f'
         # The code below is equivalent to these two regexes:
@@ -43,14 +43,16 @@ function block(str::AbstractString, block_scalar::AbstractString="")
                     elseif !isspace(prev)
                         write(out, ' ')
                     else
-                        write(ending, '\n')
+                        num_newlines += 1
                     end
                 else
-                    write(ending, '\n')
+                    num_newlines += 1
                 end
             elseif curr != '\0'
-                write(out, take!(ending))
-                ending = IOBuffer()
+                if num_newlines > 0
+                    write(out, "\n" ^ num_newlines)
+                    num_newlines = 0
+                end
 
                 write(out, curr)
             end
@@ -59,15 +61,26 @@ function block(str::AbstractString, block_scalar::AbstractString="")
             curr = next
         end
 
-        write(out, curr)
+        if curr == '\n'
+            num_newlines += 1
+        elseif curr != '\0'
+            if num_newlines > 0
+                write(out, "\n" ^ num_newlines)
+                num_newlines = 0
+            end
+
+            write(out, curr)
+        end
     elseif style == 'l'
         curr = '\0'
         for next in str
             if curr == '\n'
-                write(ending, '\n')
+                num_newlines += 1
             elseif curr != '\0'
-                write(out, take!(ending))
-                ending = IOBuffer()
+                if num_newlines > 0
+                    write(out, "\n" ^ num_newlines)
+                    num_newlines = 0
+                end
 
                 write(out, curr)
             end
@@ -75,16 +88,24 @@ function block(str::AbstractString, block_scalar::AbstractString="")
             curr = next
         end
 
-        write(out, curr)
+        if curr == '\n'
+            num_newlines += 1
+        elseif curr != '\0'
+            if num_newlines > 0
+                write(out, "\n" ^ num_newlines)
+                num_newlines = 0
+            end
+
+            write(out, curr)
+        end
     else
         throw(ArgumentError("Unknown block style indicator: $(repr(style))"))
     end
 
-    seekstart(ending)
     if chomp == 'c'
-        !eof(ending) && write(out, read(ending, Char))
+        num_newlines > 0 && write(out, '\n')
     elseif chomp == 'k'
-        write(out, ending)
+        write(out, "\n" ^ num_newlines)
     elseif chomp != 's'
         throw(ArgumentError("Unknown block chomping indicator: $(repr(chomp))"))
     end
