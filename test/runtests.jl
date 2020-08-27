@@ -56,4 +56,12 @@ const WHITESPACE = "a\nb\n c \nd\n"
             @test block(str) == yaml_block(str, ">-")
         end
     end
+
+    @testset "block invalid indicator" begin
+        @test_throws ArgumentError block("", "fs_")  # Too many indicators
+        @test_throws ArgumentError block("", "sf")   # Order matters
+        @test_throws ArgumentError block("", "_s")   # Invalid style
+        @test_throws ArgumentError block("", "f_")   # Invalid chomp
+        @test_throws ArgumentError block("", "_")    # Invalid style/chomp
+    end
 end
