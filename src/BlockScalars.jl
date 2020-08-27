@@ -23,6 +23,9 @@ function block(str::AbstractString, block_scalar::AbstractString="")
         DEFAULT_STYLE, DEFAULT_CHOMP
     end
 
+    out = IOBuffer()
+    ending = IOBuffer()
+
     if style == 'f'
         # The code below is equivalent to these two regexes:
         # ```
@@ -30,41 +33,63 @@ function block(str::AbstractString, block_scalar::AbstractString="")
         # str = replace(str, r"(?<=\n)\n(?=\S)" => "")
         # ```
 
-        b = IOBuffer()
         prev = curr = '\0'
         for next in str
-            if curr == '\n' && !isspace(next)
-                if prev == '\n'
-                    # Skip
-                elseif !isspace(prev)
-                    write(b, ' ')
+
+            if curr == '\n'
+                if !isspace(next)
+                    if prev == '\n'
+                        # Skip
+                    elseif !isspace(prev)
+                        write(out, ' ')
+                    else
+                        write(ending, '\n')
+                    end
                 else
-                    write(b, curr)
+                    write(ending, '\n')
                 end
             elseif curr != '\0'
-                write(b, curr)
+                write(out, take!(ending))
+                ending = IOBuffer()
+
+                write(out, curr)
             end
 
             prev = curr
             curr = next
         end
 
-        write(b, curr)
-        str = String(take!(b))
-    elseif style != 'l'
+        write(out, curr)
+    elseif style == 'l'
+        curr = '\0'
+        for next in str
+            if curr == '\n'
+                write(ending, '\n')
+            elseif curr != '\0'
+                write(out, take!(ending))
+                ending = IOBuffer()
+
+                write(out, curr)
+            end
+
+            curr = next
+        end
+
+        write(out, curr)
+    else
         throw(ArgumentError("Unknown block style indicator: $(repr(style))"))
     end
 
+    seekstart(ending)
     if chomp == 'c'
-        suffix = endswith(str, '\n') ? "\n" : ""
-        str = rstrip(str, '\n') * suffix
-    elseif chomp == 's'
-        str = rstrip(str, '\n')
-    elseif chomp != 'k'
+        !eof(ending) && write(out, read(ending, Char))
+    elseif chomp == 'k'
+        write(out, ending)
+    elseif chomp != 's'
         throw(ArgumentError("Unknown block chomping indicator: $(repr(chomp))"))
     end
 
-    return str
+    return String(take!(out))
 end
 
 macro blk_str(str::AbstractString, suffix::AbstractString="")
