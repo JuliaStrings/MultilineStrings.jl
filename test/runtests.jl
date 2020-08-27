@@ -10,25 +10,28 @@ function yaml_block(str, block_scalar)
 end
 
 # https://yaml-multiline.info/
-const TEXT = """
-    Several lines of text,
-    with some "quotes" of various 'types'
-    and also two blank lines:
+const TEST_STRINGS = [
+    "paragraph" => """
+        Several lines of text,
+        with some "quotes" of various 'types'
+        and also two blank lines:
 
 
-    plus another line at the end.
+        plus another line at the end.
 
 
-    """
-
-const WHITESPACE = "a\nb\n c \nd\n"
+        """,
+    "whitespace" => "a\nb\n c \nd\n",
+    "no ending newline" => "foo",
+]
 
 # Validate `yaml_block` function
-@assert yaml_block(TEXT, "|+") == TEXT
-@assert yaml_block(TEXT, "|+") == TEXT
+for (test, str) in TEST_STRINGS
+    @assert yaml_block(str, "|+") == str
+end
 
 @testset "BlockScalars.jl" begin
-    @testset "block: $name" for (name, str) in ("TEXT" => TEXT, "WHITESPACE" => WHITESPACE)
+    @testset "block: $test" for (test, str) in TEST_STRINGS
         @testset "literal" begin
             @test block(str, "lk") == yaml_block(str, "|+")
             @test block(str, "lc") == yaml_block(str, "|")

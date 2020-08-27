@@ -56,7 +56,8 @@ function block(str::AbstractString, block_scalar::AbstractString="")
     end
 
     if chomp == 'c'
-        str = rstrip(str, '\n') * '\n'
+        suffix = endswith(str, '\n') ? "\n" : ""
+        str = rstrip(str, '\n') * suffix
     elseif chomp == 's'
         str = rstrip(str, '\n')
     elseif chomp != 'k'
