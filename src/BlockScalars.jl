@@ -25,7 +25,7 @@ function block(str::AbstractString, block_scalar::AbstractString="")
 
     if style == 'f'
         str = replace(str, r"(?<=\S)\n(?=\S)" => " ")
-        str = replace(str, r"(?<=\S)\n(\n+)(?!$)" => s"\1")
+        str = replace(str, r"(?<=\n)\n(?=\S)" => "")
     elseif style != 'l'
         throw(ArgumentError("Unknown block style indicator: $(repr(style))"))
     end
