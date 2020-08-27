@@ -23,9 +23,14 @@ function block(str::AbstractString, block_scalar::AbstractString="")
         DEFAULT_STYLE, DEFAULT_CHOMP
     end
 
-    out = IOBuffer()
-    num_newlines = 0
+    # Append an additional character to force one more iteration of the style loop
+    str *= '\0'
 
+    out = IOBuffer()
+    num_newlines = 0  # The number of newlines at the end of the string
+    prev = curr = '\0'
+
+    # Replace newlines with spaces (folded)
     if style == 'f'
         # The code below is equivalent to these two regexes:
         # ```
@@ -33,14 +38,13 @@ function block(str::AbstractString, block_scalar::AbstractString="")
         # str = replace(str, r"(?<=\n)\n(?=\S)" => "")
         # ```
 
-        prev = curr = '\0'
         for next in str
-
             if curr == '\n'
                 if !isspace(next)
                     if prev == '\n'
-                        # Skip
+                        # Skip last newline in a sequence of sequential blank lines
                     elseif !isspace(prev)
+                        # Replace a single newline with a space
                         write(out, ' ')
                     else
                         num_newlines += 1
@@ -49,6 +53,7 @@ function block(str::AbstractString, block_scalar::AbstractString="")
                     num_newlines += 1
                 end
             elseif curr != '\0'
+                # Insert newlines which were determined to not be at the end of the string
                 if num_newlines > 0
                     write(out, "\n" ^ num_newlines)
                     num_newlines = 0
@@ -61,22 +66,13 @@ function block(str::AbstractString, block_scalar::AbstractString="")
             curr = next
         end
 
-        if curr == '\n'
-            num_newlines += 1
-        elseif curr != '\0'
-            if num_newlines > 0
-                write(out, "\n" ^ num_newlines)
-                num_newlines = 0
-            end
-
-            write(out, curr)
-        end
+    # Keep newlines (literal)
     elseif style == 'l'
-        curr = '\0'
         for next in str
             if curr == '\n'
                 num_newlines += 1
             elseif curr != '\0'
+                # Insert newlines which were determined to not be at the end of the string
                 if num_newlines > 0
                     write(out, "\n" ^ num_newlines)
                     num_newlines = 0
@@ -87,26 +83,22 @@ function block(str::AbstractString, block_scalar::AbstractString="")
 
             curr = next
         end
-
-        if curr == '\n'
-            num_newlines += 1
-        elseif curr != '\0'
-            if num_newlines > 0
-                write(out, "\n" ^ num_newlines)
-                num_newlines = 0
-            end
-
-            write(out, curr)
-        end
     else
         throw(ArgumentError("Unknown block style indicator: $(repr(style))"))
     end
 
+    # Single newline at end (clip)
     if chomp == 'c'
         num_newlines > 0 && write(out, '\n')
+
+    # No newline at end (strip)
+    elseif chomp == 's'
+        # no-op
+
+    # All newlines from end (keep)
     elseif chomp == 'k'
         write(out, "\n" ^ num_newlines)
-    elseif chomp != 's'
+    else
         throw(ArgumentError("Unknown block chomping indicator: $(repr(chomp))"))
     end
 
