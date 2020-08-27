@@ -2,6 +2,7 @@ module BlockScalars
 
 export @blk_str
 
+const ETX = '\x03'  # ASCII control character: End of Text
 
 const DEFAULT_STYLE = 'f'
 const DEFAULT_CHOMP = 's'
@@ -23,8 +24,9 @@ function block(str::AbstractString, block_scalar::AbstractString="")
         DEFAULT_STYLE, DEFAULT_CHOMP
     end
 
-    # Append an additional character to force one more iteration of the style loop
-    str *= '\0'
+    # Append an additional, non-space, character to force one more iteration of the style
+    # loop
+    str *= ETX
 
     out = IOBuffer()
     num_newlines = 0  # The number of newlines at the end of the string
@@ -40,7 +42,7 @@ function block(str::AbstractString, block_scalar::AbstractString="")
 
         for next in str
             if curr == '\n'
-                if !isspace(next)
+                if !isspace(next) && next != ETX
                     if prev == '\n'
                         # Skip last newline in a sequence of sequential blank lines
                     elseif !isspace(prev)
