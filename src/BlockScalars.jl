@@ -31,9 +31,9 @@ function block(str::AbstractString, block_scalar::AbstractString="")
     end
 
     if chomp == 'c'
-        str = replace(str, r"\n+$" => "\n")
+        str = rstrip(str, '\n') * '\n'
     elseif chomp == 's'
-        str = replace(str, r"\n+$" => "")
+        str = rstrip(str, '\n')
     elseif chomp != 'k'
         throw(ArgumentError("Unknown block chomping indicator: $(repr(chomp))"))
     end
