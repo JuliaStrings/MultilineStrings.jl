@@ -3,27 +3,14 @@ module BlockScalars
 export @blk_str
 
 const ETX = '\x03'  # ASCII control character: End of Text
+const DEFAULT_STYLE = :folded
+const DEFAULT_CHOMP = :strip
 
-const DEFAULT_STYLE = 'f'
-const DEFAULT_CHOMP = 's'
+function block(str::AbstractString; style=DEFAULT_STYLE, chomp=DEFAULT_CHOMP)
+    block(str, style, chomp)
+end
 
-function block(str::AbstractString, block_scalar::AbstractString="")
-    block_scalar_len = length(block_scalar)
-    block_scalar_len > 2 && throw(ArgumentError("Too many indicators provided"))
-
-    style, chomp = if block_scalar_len == 2
-        block_scalar
-    elseif block_scalar_len == 1
-        ind = block_scalar[1]
-        if ind in "fl"
-            ind, DEFAULT_CHOMP
-        else
-            DEFAULT_STYLE, ind
-        end
-    else
-        DEFAULT_STYLE, DEFAULT_CHOMP
-    end
-
+function block(str::AbstractString, style::Symbol, chomp::Symbol=DEFAULT_CHOMP)
     # Append an additional, non-space, character to force one more iteration of the style
     # loop
     str *= ETX
@@ -33,7 +20,7 @@ function block(str::AbstractString, block_scalar::AbstractString="")
     prev = curr = '\0'
 
     # Replace newlines with spaces (folded)
-    if style == 'f'
+    if style === :folded
         # The code below is equivalent to these two regexes:
         # ```
         # str = replace(str, r"(?<=\S)\n(?=\S)" => " ")
@@ -69,7 +56,7 @@ function block(str::AbstractString, block_scalar::AbstractString="")
         end
 
     # Keep newlines (literal)
-    elseif style == 'l'
+    elseif style === :literal
         for next in str
             if curr == '\n'
                 num_newlines += 1
@@ -86,29 +73,68 @@ function block(str::AbstractString, block_scalar::AbstractString="")
             curr = next
         end
     else
-        throw(ArgumentError("Unknown block style indicator: $(repr(style))"))
+        throw(ArgumentError("Unknown block style indicator: $style"))
     end
 
     # Single newline at end (clip)
-    if chomp == 'c'
+    if chomp === :clip
         num_newlines > 0 && write(out, '\n')
 
     # No newline at end (strip)
-    elseif chomp == 's'
+    elseif chomp === :strip
         # no-op
 
     # All newlines from end (keep)
-    elseif chomp == 'k'
+    elseif chomp === :keep
         write(out, "\n" ^ num_newlines)
     else
-        throw(ArgumentError("Unknown block chomping indicator: $(repr(chomp))"))
+        throw(ArgumentError("Unknown block chomping indicator: $chomp"))
     end
 
     return String(take!(out))
 end
 
-macro blk_str(str::AbstractString, suffix::AbstractString="")
-    block(str, suffix)
+macro blk_str(str::AbstractString, indicators::AbstractString="")
+    indicators_len = length(indicators)
+    indicators_len > 2 && throw(ArgumentError("Too many indicators provided"))
+
+    # Note: Using '\0` to indicate undefined
+    style_char, chomp_char = if indicators_len == 2
+        indicators
+    elseif indicators_len == 1
+        ind = indicators[1]
+        if ind in "fl"
+            ind, '\0'
+        else
+            '\0', ind
+        end
+    else
+        '\0', '\0'
+    end
+
+    style = if style_char == 'f'
+        :folded
+    elseif style_char == 'l'
+        :literal
+    elseif style_char == '\0'
+        DEFAULT_STYLE
+    else
+        throw(ArgumentError("Unknown block style indicator: $(repr(style_char))"))
+    end
+
+    chomp = if chomp_char == 'c'
+        :clip
+    elseif chomp_char == 's'
+        :strip
+    elseif chomp_char == 'k'
+        :keep
+    elseif chomp_char == '\0'
+        DEFAULT_CHOMP
+    else
+        throw(ArgumentError("Unknown block chomping indicator: $(repr(chomp_char))"))
+    end
+
+    return block(str, style, chomp)
 end
 
 end

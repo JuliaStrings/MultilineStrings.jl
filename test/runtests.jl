@@ -33,26 +33,26 @@ end
 @testset "BlockScalars.jl" begin
     @testset "block: $test" for (test, str) in TEST_STRINGS
         @testset "literal" begin
-            @test block(str, "lk") == yaml_block(str, "|+")
-            @test block(str, "lc") == yaml_block(str, "|")
-            @test block(str, "ls") == yaml_block(str, "|-")
+            @test block(str, :literal, :keep) == yaml_block(str, "|+")
+            @test block(str, :literal, :clip) == yaml_block(str, "|")
+            @test block(str, :literal, :strip) == yaml_block(str, "|-")
         end
 
         @testset "folding" begin
-            @test block(str, "fk") == yaml_block(str, ">+")
-            @test block(str, "fc") == yaml_block(str, ">")
-            @test block(str, "fs") == yaml_block(str, ">-")
-        end
-
-        @testset "default style" begin
-            @test block(str, "k") == yaml_block(str, ">+")
-            @test block(str, "c") == yaml_block(str, ">")
-            @test block(str, "s") == yaml_block(str, ">-")
+            @test block(str, :folded, :keep) == yaml_block(str, ">+")
+            @test block(str, :folded, :clip) == yaml_block(str, ">")
+            @test block(str, :folded, :strip) == yaml_block(str, ">-")
         end
 
         @testset "default chomp" begin
-            @test block(str, "l") == yaml_block(str, "|-")
-            @test block(str, "f") == yaml_block(str, ">-")
+            @test block(str, :literal) == yaml_block(str, "|-")
+            @test block(str, :folded) == yaml_block(str, ">-")
+        end
+
+        @testset "default style" begin
+            @test block(str, chomp=:keep) == yaml_block(str, ">+")
+            @test block(str, chomp=:clip) == yaml_block(str, ">")
+            @test block(str, chomp=:strip) == yaml_block(str, ">-")
         end
 
         @testset "default" begin
@@ -60,11 +60,21 @@ end
         end
     end
 
-    @testset "block invalid indicator" begin
-        @test_throws ArgumentError block("", "fs_")  # Too many indicators
-        @test_throws ArgumentError block("", "sf")   # Order matters
-        @test_throws ArgumentError block("", "_s")   # Invalid style
-        @test_throws ArgumentError block("", "f_")   # Invalid chomp
-        @test_throws ArgumentError block("", "_")    # Invalid style/chomp
+    # @testset "block invalid indicator" begin
+    #     @test_throws ArgumentError block("", "fs_")  # Too many indicators
+    #     @test_throws ArgumentError block("", "sf")   # Order matters
+    #     @test_throws ArgumentError block("", "_s")   # Invalid style
+    #     @test_throws ArgumentError block("", "f_")   # Invalid chomp
+    #     @test_throws ArgumentError block("", "_")    # Invalid style/chomp
+    # end
+
+    @testset "@blk_str" begin
+        @testset "invalid indicators" begin
+            @test_throws LoadError macroexpand(@__MODULE__, :(@blk_str "" "fs_"))  # Too many indicators
+            @test_throws LoadError macroexpand(@__MODULE__, :(@blk_str "" "sf"))  # Order matters
+            @test_throws LoadError macroexpand(@__MODULE__, :(@blk_str "" "_s"))  # Invalid style
+            @test_throws LoadError macroexpand(@__MODULE__, :(@blk_str "" "f_"))  # Invalid chomp
+            @test_throws LoadError macroexpand(@__MODULE__, :(@blk_str "" "_"))   # Invalid style/chomp
+        end
     end
 end
