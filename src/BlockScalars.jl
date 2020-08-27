@@ -24,8 +24,33 @@ function block(str::AbstractString, block_scalar::AbstractString="")
     end
 
     if style == 'f'
-        str = replace(str, r"(?<=\S)\n(?=\S)" => " ")
-        str = replace(str, r"(?<=\n)\n(?=\S)" => "")
+        # The code below is equivalent to these two regexes:
+        # ```
+        # str = replace(str, r"(?<=\S)\n(?=\S)" => " ")
+        # str = replace(str, r"(?<=\n)\n(?=\S)" => "")
+        # ```
+
+        b = IOBuffer()
+        prev = curr = '\0'
+        for next in str
+            if curr == '\n' && !isspace(next)
+                if prev == '\n'
+                    # Skip
+                elseif !isspace(prev)
+                    write(b, ' ')
+                else
+                    write(b, curr)
+                end
+            elseif curr != '\0'
+                write(b, curr)
+            end
+
+            prev = curr
+            curr = next
+        end
+
+        write(b, curr)
+        str = String(take!(b))
     elseif style != 'l'
         throw(ArgumentError("Unknown block style indicator: $(repr(style))"))
     end
