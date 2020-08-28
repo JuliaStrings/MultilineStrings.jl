@@ -146,7 +146,49 @@ function block(str::AbstractString, style::Symbol, chomp::Symbol)
 end
 
 macro blk_str(str::AbstractString, indicators::AbstractString="")
-    return block(str, indicators)
+    parsed = interpolate(str)
+
+    # When no string interpolation needs to take place we can just process the multiline
+    # string during parse time. If string interpolation needs to take place we'll evaluate
+    # the multiline string at runtime so that we can process after interpolation has taken
+    # place.
+    result = if parsed isa String
+        block(unescape_string(parsed), indicators)
+    else
+        Expr(:call, :(BlockScalars.block), parsed, indicators)
+    end
+
+    return esc(result)
+end
+
+function interpolate(str::AbstractString)
+    components = []
+    start = 1
+    lastind = lastindex(str)
+
+    state = iterate(str)
+    while state !== nothing
+        c, i = state
+
+        if c == '$'
+            ending = prevind(str, i, 2)
+            start <= ending && push!(components, SubString(str, start, ending))
+
+            expr, i = Meta.parse(str, i; greedy=false)
+            push!(components, expr)
+            start = i
+        end
+
+        state = iterate(str, i)
+    end
+
+    # When interpolation isn't used we can just return the original string
+    start == 1 && return str
+
+    ending = lastind
+    start <= ending && push!(components, SubString(str, start, ending))
+
+    return Expr(:string, components...)
 end
 
 end

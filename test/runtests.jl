@@ -1,4 +1,4 @@
-using BlockScalars: @blk_str, block
+using BlockScalars: BlockScalars, @blk_str, block, interpolate
 using Test
 using YAML: YAML
 
@@ -114,14 +114,32 @@ end
         end
     end
 
+    @testset "interpolate" begin
+        @test interpolate("x") == "x"
+        @test interpolate("\$x") == Expr(:string, :x)
+        @test interpolate("\$(x)") == Expr(:string, :x)
+        @test interpolate("\$(\"x\")") == Expr(:string, "x")
+
+        @test interpolate("<\$x>") == Expr(:string, "<", :x, ">")
+        @test interpolate("<\$(x)>") == Expr(:string, "<", :x, ">")
+
+        # The quoting in these examples can result in exceptions being raised during parsing
+        # if handled incorrectly.
+        @test interpolate("\"\\n\"") == "\"\\n\""
+        @test interpolate("\$(join([\"a\", \"b\"], \", \"))") == Expr(:string, :(join(["a", "b"], ", ")))
+    end
 
     @testset "@blk_str" begin
-        @testset "invalid indicators" begin
-            @test_throws LoadError macroexpand(@__MODULE__, :(@blk_str "" "fs_"))  # Too many indicators
-            @test_throws LoadError macroexpand(@__MODULE__, :(@blk_str "" "sf"))  # Order matters
-            @test_throws LoadError macroexpand(@__MODULE__, :(@blk_str "" "_s"))  # Invalid style
-            @test_throws LoadError macroexpand(@__MODULE__, :(@blk_str "" "f_"))  # Invalid chomp
-            @test_throws LoadError macroexpand(@__MODULE__, :(@blk_str "" "_"))   # Invalid style/chomp
+        @testset "quoting" begin
+            # Use of double-quotes could cause failure if not handled properly:
+            # `syntax: incomplete: invalid string syntax`
+            @test blk"\"\n\"" == "\" \""
+        end
+
+        @testset "string-interpolation" begin
+            # If processing would accidentally take place in the interpolated code then
+            # we could see "a b " as the result.
+            @test blk"""$(join(("a", "b") .* "\n", ""))"""fc == "a b\n"
         end
     end
 end
