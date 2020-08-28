@@ -15,11 +15,15 @@ function block(str::AbstractString, indicators::AbstractString)
     indicators_len > 2 && throw(ArgumentError("Too many indicators provided"))
 
     # Note: Using '\0` to indicate undefined
+    yaml_chomp = false
     style_char, chomp_char = if indicators_len == 2
         indicators
     elseif indicators_len == 1
         ind = indicators[1]
-        if ind in "fl"
+        if ind in ('f', 'l')
+            ind, '\0'
+        elseif ind in ('>', '|')
+            yaml_chomp = true
             ind, '\0'
         else
             '\0', ind
@@ -28,9 +32,13 @@ function block(str::AbstractString, indicators::AbstractString)
         '\0', '\0'
     end
 
-    style = if style_char == 'f'
+    if style_char != '\0' && chomp_char != '\0' && isletter(style_char) ⊻ isletter(chomp_char)
+        throw(ArgumentError("Can't mix YAML style block indicators with letter indicators"))
+    end
+
+    style = if style_char == 'f' || style_char == '>'
         :folded
-    elseif style_char == 'l'
+    elseif style_char == 'l' || style_char == '|'
         :literal
     elseif style_char == '\0'
         DEFAULT_STYLE
@@ -38,11 +46,11 @@ function block(str::AbstractString, indicators::AbstractString)
         throw(ArgumentError("Unknown block style indicator: $(repr(style_char))"))
     end
 
-    chomp = if chomp_char == 'c'
+    chomp = if chomp_char == 'c' || yaml_chomp
         :clip
-    elseif chomp_char == 's'
+    elseif chomp_char == 's' || chomp_char == '-'
         :strip
-    elseif chomp_char == 'k'
+    elseif chomp_char == 'k' || chomp_char == '+'
         :keep
     elseif chomp_char == '\0'
         DEFAULT_CHOMP

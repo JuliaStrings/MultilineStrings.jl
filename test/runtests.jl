@@ -52,6 +52,9 @@ end
             @test block(str, "lk") == expected_lk
             @test block(str, "lc") == expected_lc
             @test block(str, "ls") == expected_ls
+
+            @test block(str, "|+") == expected_lk
+            @test block(str, "|-") == expected_ls
         end
 
         @testset "folding" begin
@@ -66,6 +69,9 @@ end
             @test block(str, "fk") == expected_fk
             @test block(str, "fc") == expected_fc
             @test block(str, "fs") == expected_fs
+
+            @test block(str, ">+") == expected_fk
+            @test block(str, ">-") == expected_fs
         end
 
         @testset "default chomp" begin
@@ -77,6 +83,9 @@ end
 
             @test block(str, "l") == expected_ls
             @test block(str, "f") == expected_fs
+
+            @test block(str, "|") == expected_lc
+            @test block(str, ">") == expected_fc
         end
 
         @testset "default style" begin
@@ -87,6 +96,9 @@ end
             @test block(str, "k") == expected_fk
             @test block(str, "c") == expected_fc
             @test block(str, "s") == expected_fs
+
+            @test block(str, "+") == expected_fk
+            @test block(str, "-") == expected_fs
         end
 
         @testset "default style/chomp" begin
