@@ -10,6 +10,49 @@ function block(str::AbstractString; style=DEFAULT_STYLE, chomp=DEFAULT_CHOMP)
     block(str, style, chomp)
 end
 
+function block(str::AbstractString, indicators::AbstractString)
+    indicators_len = length(indicators)
+    indicators_len > 2 && throw(ArgumentError("Too many indicators provided"))
+
+    # Note: Using '\0` to indicate undefined
+    style_char, chomp_char = if indicators_len == 2
+        indicators
+    elseif indicators_len == 1
+        ind = indicators[1]
+        if ind in "fl"
+            ind, '\0'
+        else
+            '\0', ind
+        end
+    else
+        '\0', '\0'
+    end
+
+    style = if style_char == 'f'
+        :folded
+    elseif style_char == 'l'
+        :literal
+    elseif style_char == '\0'
+        DEFAULT_STYLE
+    else
+        throw(ArgumentError("Unknown block style indicator: $(repr(style_char))"))
+    end
+
+    chomp = if chomp_char == 'c'
+        :clip
+    elseif chomp_char == 's'
+        :strip
+    elseif chomp_char == 'k'
+        :keep
+    elseif chomp_char == '\0'
+        DEFAULT_CHOMP
+    else
+        throw(ArgumentError("Unknown block chomping indicator: $(repr(chomp_char))"))
+    end
+
+    return block(str, style, chomp)
+end
+
 function block(str::AbstractString, style::Symbol, chomp::Symbol=DEFAULT_CHOMP)
     # Append an additional, non-space, character to force one more iteration of the style
     # loop
@@ -95,46 +138,7 @@ function block(str::AbstractString, style::Symbol, chomp::Symbol=DEFAULT_CHOMP)
 end
 
 macro blk_str(str::AbstractString, indicators::AbstractString="")
-    indicators_len = length(indicators)
-    indicators_len > 2 && throw(ArgumentError("Too many indicators provided"))
-
-    # Note: Using '\0` to indicate undefined
-    style_char, chomp_char = if indicators_len == 2
-        indicators
-    elseif indicators_len == 1
-        ind = indicators[1]
-        if ind in "fl"
-            ind, '\0'
-        else
-            '\0', ind
-        end
-    else
-        '\0', '\0'
-    end
-
-    style = if style_char == 'f'
-        :folded
-    elseif style_char == 'l'
-        :literal
-    elseif style_char == '\0'
-        DEFAULT_STYLE
-    else
-        throw(ArgumentError("Unknown block style indicator: $(repr(style_char))"))
-    end
-
-    chomp = if chomp_char == 'c'
-        :clip
-    elseif chomp_char == 's'
-        :strip
-    elseif chomp_char == 'k'
-        :keep
-    elseif chomp_char == '\0'
-        DEFAULT_CHOMP
-    else
-        throw(ArgumentError("Unknown block chomping indicator: $(repr(chomp_char))"))
-    end
-
-    return block(str, style, chomp)
+    return block(str, indicators)
 end
 
 end

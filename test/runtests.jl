@@ -48,6 +48,10 @@ end
             @test block(str, style=:literal, chomp=:keep) == expected_lk
             @test block(str, style=:literal, chomp=:clip) == expected_lc
             @test block(str, style=:literal, chomp=:strip) == expected_ls
+
+            @test block(str, "lk") == expected_lk
+            @test block(str, "lc") == expected_lc
+            @test block(str, "ls") == expected_ls
         end
 
         @testset "folding" begin
@@ -58,6 +62,10 @@ end
             @test block(str, style=:folded, chomp=:keep) == expected_fk
             @test block(str, style=:folded, chomp=:clip) == expected_fc
             @test block(str, style=:folded, chomp=:strip) == expected_fs
+
+            @test block(str, "fk") == expected_fk
+            @test block(str, "fc") == expected_fc
+            @test block(str, "fs") == expected_fs
         end
 
         @testset "default chomp" begin
@@ -66,16 +74,24 @@ end
 
             @test block(str, style=:literal) == expected_ls
             @test block(str, style=:folded) == expected_fs
+
+            @test block(str, "l") == expected_ls
+            @test block(str, "f") == expected_fs
         end
 
         @testset "default style" begin
             @test block(str, chomp=:keep) == expected_fk
             @test block(str, chomp=:clip) == expected_fc
             @test block(str, chomp=:strip) == expected_fs
+
+            @test block(str, "k") == expected_fk
+            @test block(str, "c") == expected_fc
+            @test block(str, "s") == expected_fs
         end
 
         @testset "default style/chomp" begin
             @test block(str) == expected_fs
+            @test block(str, "") == expected_fs
         end
     end
 
