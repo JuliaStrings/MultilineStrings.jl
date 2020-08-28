@@ -31,86 +31,89 @@ for (test, str) in TEST_STRINGS
 end
 
 @testset "BlockScalars.jl" begin
-    @testset "block: $test" for (test, str) in TEST_STRINGS
-        expected_lk = yaml_block(str, "|+")
-        expected_lc = yaml_block(str, "|")
-        expected_ls = yaml_block(str, "|-")
+    @testset "block" begin
+        @testset "string: $test" for (test, str) in TEST_STRINGS
+            expected_lk = yaml_block(str, "|+")
+            expected_lc = yaml_block(str, "|")
+            expected_ls = yaml_block(str, "|-")
 
-        expected_fk = yaml_block(str, ">+")
-        expected_fc = yaml_block(str, ">")
-        expected_fs = yaml_block(str, ">-")
+            expected_fk = yaml_block(str, ">+")
+            expected_fc = yaml_block(str, ">")
+            expected_fs = yaml_block(str, ">-")
 
-        @testset "literal" begin
-            @test block(str, :literal, :keep) == expected_lk
-            @test block(str, :literal, :clip) == expected_lc
-            @test block(str, :literal, :strip) == expected_ls
+            @testset "literal" begin
+                @test block(str, :literal, :keep) == expected_lk
+                @test block(str, :literal, :clip) == expected_lc
+                @test block(str, :literal, :strip) == expected_ls
 
-            @test block(str, style=:literal, chomp=:keep) == expected_lk
-            @test block(str, style=:literal, chomp=:clip) == expected_lc
-            @test block(str, style=:literal, chomp=:strip) == expected_ls
+                @test block(str, style=:literal, chomp=:keep) == expected_lk
+                @test block(str, style=:literal, chomp=:clip) == expected_lc
+                @test block(str, style=:literal, chomp=:strip) == expected_ls
 
-            @test block(str, "lk") == expected_lk
-            @test block(str, "lc") == expected_lc
-            @test block(str, "ls") == expected_ls
+                @test block(str, "lk") == expected_lk
+                @test block(str, "lc") == expected_lc
+                @test block(str, "ls") == expected_ls
 
-            @test block(str, "|+") == expected_lk
-            @test block(str, "|-") == expected_ls
+                @test block(str, "|+") == expected_lk
+                @test block(str, "|-") == expected_ls
+            end
+
+            @testset "folding" begin
+                @test block(str, :folded, :keep) == expected_fk
+                @test block(str, :folded, :clip) == expected_fc
+                @test block(str, :folded, :strip) == expected_fs
+
+                @test block(str, style=:folded, chomp=:keep) == expected_fk
+                @test block(str, style=:folded, chomp=:clip) == expected_fc
+                @test block(str, style=:folded, chomp=:strip) == expected_fs
+
+                @test block(str, "fk") == expected_fk
+                @test block(str, "fc") == expected_fc
+                @test block(str, "fs") == expected_fs
+
+                @test block(str, ">+") == expected_fk
+                @test block(str, ">-") == expected_fs
+            end
+
+            @testset "default chomp" begin
+                @test block(str, style=:literal) == expected_ls
+                @test block(str, style=:folded) == expected_fs
+
+                @test block(str, "l") == expected_ls
+                @test block(str, "f") == expected_fs
+
+                @test block(str, "|") == expected_lc
+                @test block(str, ">") == expected_fc
+            end
+
+            @testset "default style" begin
+                @test block(str, chomp=:keep) == expected_fk
+                @test block(str, chomp=:clip) == expected_fc
+                @test block(str, chomp=:strip) == expected_fs
+
+                @test block(str, "k") == expected_fk
+                @test block(str, "c") == expected_fc
+                @test block(str, "s") == expected_fs
+
+                @test block(str, "+") == expected_fk
+                @test block(str, "-") == expected_fs
+            end
+
+            @testset "default style/chomp" begin
+                @test block(str) == expected_fs
+                @test block(str, "") == expected_fs
+            end
         end
 
-        @testset "folding" begin
-            @test block(str, :folded, :keep) == expected_fk
-            @test block(str, :folded, :clip) == expected_fc
-            @test block(str, :folded, :strip) == expected_fs
-
-            @test block(str, style=:folded, chomp=:keep) == expected_fk
-            @test block(str, style=:folded, chomp=:clip) == expected_fc
-            @test block(str, style=:folded, chomp=:strip) == expected_fs
-
-            @test block(str, "fk") == expected_fk
-            @test block(str, "fc") == expected_fc
-            @test block(str, "fs") == expected_fs
-
-            @test block(str, ">+") == expected_fk
-            @test block(str, ">-") == expected_fs
-        end
-
-        @testset "default chomp" begin
-            @test block(str, style=:literal) == expected_ls
-            @test block(str, style=:folded) == expected_fs
-
-            @test block(str, "l") == expected_ls
-            @test block(str, "f") == expected_fs
-
-            @test block(str, "|") == expected_lc
-            @test block(str, ">") == expected_fc
-        end
-
-        @testset "default style" begin
-            @test block(str, chomp=:keep) == expected_fk
-            @test block(str, chomp=:clip) == expected_fc
-            @test block(str, chomp=:strip) == expected_fs
-
-            @test block(str, "k") == expected_fk
-            @test block(str, "c") == expected_fc
-            @test block(str, "s") == expected_fs
-
-            @test block(str, "+") == expected_fk
-            @test block(str, "-") == expected_fs
-        end
-
-        @testset "default style/chomp" begin
-            @test block(str) == expected_fs
-            @test block(str, "") == expected_fs
+        @testset "invalid indicators" begin
+            @test_throws ArgumentError block("", "fs_")  # Too many indicators
+            @test_throws ArgumentError block("", "sf")   # Order matters
+            @test_throws ArgumentError block("", "_s")   # Invalid style
+            @test_throws ArgumentError block("", "f_")   # Invalid chomp
+            @test_throws ArgumentError block("", "_")    # Invalid style/chomp
         end
     end
 
-    # @testset "block invalid indicator" begin
-    #     @test_throws ArgumentError block("", "fs_")  # Too many indicators
-    #     @test_throws ArgumentError block("", "sf")   # Order matters
-    #     @test_throws ArgumentError block("", "_s")   # Invalid style
-    #     @test_throws ArgumentError block("", "f_")   # Invalid chomp
-    #     @test_throws ArgumentError block("", "_")    # Invalid style/chomp
-    # end
 
     @testset "@blk_str" begin
         @testset "invalid indicators" begin
