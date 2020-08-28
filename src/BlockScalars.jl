@@ -6,10 +6,42 @@ const ETX = '\x03'  # ASCII control character: End of Text
 const DEFAULT_STYLE = :folded
 const DEFAULT_CHOMP = :strip
 
+"""
+    block(str, style=$(repr(DEFAULT_STYLE)), chomp=$(repr(DEFAULT_CHOMP))) -> AbstractString
+
+Revise a multiline string according to the provided `style` and `chomp`. Works similarly to
+YAML multiline strings (also known as block scalars).
+
+# Arguments
+- `str::AbstractString`: The multiline string to be processed
+
+# Keywords
+- `style::Symbol`: Replace newlines with spaces (`:folded`) or keep newlines (`:literal`)
+- `chomp::Symbol`: No newlines at the end (`:strip`), single newline at the end (`:clip`),
+  or keep all newlines from the end (`:keep`)
+"""
 function block(str::AbstractString; style=DEFAULT_STYLE, chomp=DEFAULT_CHOMP)
     block(str, style, chomp)
 end
 
+"""
+    block(str, indicators) -> AbstractString
+
+Revise a multiline string according to the provided style and chomp encoded in the
+`indicators` string.
+
+# Arguments
+- `str::AbstractString`: The multiline string to be processed
+- `indicators::AbstractString`: A terse string representing the style and chomp. Indicators
+  can be either in letter-form or in YAML-form:
+
+    - "fs" / ">-": folded and strip
+    - "fc" / ">": folded and clip
+    - "fk" / ">+": folded and keep
+    - "ls" / "|-": literal and strip
+    - "lc" / "|": literal and clip
+    - "lk" / "|+": literal and keep
+"""
 function block(str::AbstractString, indicators::AbstractString)
     indicators_len = length(indicators)
     indicators_len > 2 && throw(ArgumentError("Too many indicators provided"))
@@ -145,6 +177,20 @@ function block(str::AbstractString, style::Symbol, chomp::Symbol)
     return String(take!(out))
 end
 
+"""
+    @blk_str -> String
+
+Construct a multiline string according to the indicators listed after the ending quote:
+
+- `f` replace newlines with spaces (folded)
+- `l` keep newlines (literal)
+- `s` no newlines at the end (strip)
+- `c` single newline at the end (clip)
+- `k` keep all newlines from the end (keep)
+
+Note string interpolation is still respected any newlines added from interpolation will be
+also be processed.
+"""
 macro blk_str(str::AbstractString, indicators::AbstractString="")
     parsed = interpolate(str)
 
