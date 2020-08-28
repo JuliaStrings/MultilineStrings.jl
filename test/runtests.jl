@@ -75,9 +75,6 @@ end
         end
 
         @testset "default chomp" begin
-            @test block(str, :literal) == expected_ls
-            @test block(str, :folded) == expected_fs
-
             @test block(str, style=:literal) == expected_ls
             @test block(str, style=:folded) == expected_fs
 

@@ -61,7 +61,7 @@ function block(str::AbstractString, indicators::AbstractString)
     return block(str, style, chomp)
 end
 
-function block(str::AbstractString, style::Symbol, chomp::Symbol=DEFAULT_CHOMP)
+function block(str::AbstractString, style::Symbol, chomp::Symbol)
     # Append an additional, non-space, character to force one more iteration of the style
     # loop
     str *= ETX
