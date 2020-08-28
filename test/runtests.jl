@@ -32,31 +32,50 @@ end
 
 @testset "BlockScalars.jl" begin
     @testset "block: $test" for (test, str) in TEST_STRINGS
+        expected_lk = yaml_block(str, "|+")
+        expected_lc = yaml_block(str, "|")
+        expected_ls = yaml_block(str, "|-")
+
+        expected_fk = yaml_block(str, ">+")
+        expected_fc = yaml_block(str, ">")
+        expected_fs = yaml_block(str, ">-")
+
         @testset "literal" begin
-            @test block(str, :literal, :keep) == yaml_block(str, "|+")
-            @test block(str, :literal, :clip) == yaml_block(str, "|")
-            @test block(str, :literal, :strip) == yaml_block(str, "|-")
+            @test block(str, :literal, :keep) == expected_lk
+            @test block(str, :literal, :clip) == expected_lc
+            @test block(str, :literal, :strip) == expected_ls
+
+            @test block(str, style=:literal, chomp=:keep) == expected_lk
+            @test block(str, style=:literal, chomp=:clip) == expected_lc
+            @test block(str, style=:literal, chomp=:strip) == expected_ls
         end
 
         @testset "folding" begin
-            @test block(str, :folded, :keep) == yaml_block(str, ">+")
-            @test block(str, :folded, :clip) == yaml_block(str, ">")
-            @test block(str, :folded, :strip) == yaml_block(str, ">-")
+            @test block(str, :folded, :keep) == expected_fk
+            @test block(str, :folded, :clip) == expected_fc
+            @test block(str, :folded, :strip) == expected_fs
+
+            @test block(str, style=:folded, chomp=:keep) == expected_fk
+            @test block(str, style=:folded, chomp=:clip) == expected_fc
+            @test block(str, style=:folded, chomp=:strip) == expected_fs
         end
 
         @testset "default chomp" begin
-            @test block(str, :literal) == yaml_block(str, "|-")
-            @test block(str, :folded) == yaml_block(str, ">-")
+            @test block(str, :literal) == expected_ls
+            @test block(str, :folded) == expected_fs
+
+            @test block(str, style=:literal) == expected_ls
+            @test block(str, style=:folded) == expected_fs
         end
 
         @testset "default style" begin
-            @test block(str, chomp=:keep) == yaml_block(str, ">+")
-            @test block(str, chomp=:clip) == yaml_block(str, ">")
-            @test block(str, chomp=:strip) == yaml_block(str, ">-")
+            @test block(str, chomp=:keep) == expected_fk
+            @test block(str, chomp=:clip) == expected_fc
+            @test block(str, chomp=:strip) == expected_fs
         end
 
-        @testset "default" begin
-            @test block(str) == yaml_block(str, ">-")
+        @testset "default style/chomp" begin
+            @test block(str) == expected_fs
         end
     end
 
