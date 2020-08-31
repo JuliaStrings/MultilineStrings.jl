@@ -104,7 +104,8 @@ function multiline(str::AbstractString, style::Symbol, chomp::Symbol)
 
     # Replace newlines with spaces (folded)
     if style === :folded
-        # The code below is equivalent to these two regexes:
+        # The code below is equivalent to these two regexes (the non-regex code has much
+        # better performance):
         # ```
         # str = replace(str, r"(?<=\S)\n(?=\S)" => " ")
         # str = replace(str, r"(?<=\n)\n(?=\S)" => "")
@@ -180,16 +181,18 @@ end
 """
     @m_str -> String
 
-Construct a multiline string according to a style and chomp indicators (provided after the
-ending quote):
+Manipulate a multiline string literal according to a style and chomp indicator (provided
+after the ending quote):
 
 - Style indicator:
-    - `f` replace newlines with spaces (folded)
+    - `f` replace newlines with spaces (folded, default)
     - `l` keep newlines (literal)
 - Chomp indicator:
-    - `s` no newlines at the end (strip)
+    - `s` no newlines at the end (strip, default)
     - `c` single newline at the end (clip)
     - `k` keep all newlines from the end (keep)
+
+If both a style and chomp indicator is provided the style indicator must be specified first.
 
 Note string interpolation is still respected any newlines added from interpolation will be
 also be processed.

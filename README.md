@@ -10,7 +10,7 @@ Tooling for manipulating multiline strings.
 
 ## Features
 
-The package features the `@m_str` macro, inspired from [YAML's block scalars](https://yaml-multiline.info/), which provide options for manipulating multiline strings via a style and chomp indicator:
+The package features a multiline string literal (`@m_str`), inspired from [YAML's block scalars](https://yaml-multiline.info/), which provide options for manipulating multiline string literals via a style and chomp indicator:
 
 - Style indicator:
     - `f` replace newlines with spaces (folded)
@@ -52,3 +52,5 @@ to this function doesn't contain magic that may interfere with
 with the non-magical computation occurring on this device.
 """
 ```
+
+Take note that a Julia [triple-quoted string literal](https://docs.julialang.org/en/v1/manual/strings/#Triple-Quoted-String-Literals) will leave most newlines in place.
