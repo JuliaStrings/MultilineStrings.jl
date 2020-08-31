@@ -94,88 +94,28 @@ function multiline(str::AbstractString, indicators::AbstractString)
 end
 
 function multiline(str::AbstractString, style::Symbol, chomp::Symbol)
-    # Append an additional, non-space, character to force one more iteration of the style
-    # loop
-    str *= ETX
-
-    out = IOBuffer()
-    num_newlines = 0  # The number of newlines at the end of the string
-    prev = curr = '\0'
-
-    # Replace newlines with spaces (folded)
     if style === :folded
-        # The code below is equivalent to these two regexes (the non-regex code has much
-        # better performance):
-        # ```
-        # str = replace(str, r"(?<=\S)\n(?=\S)" => " ")
-        # str = replace(str, r"(?<=\n)\n(?=\S)" => "")
-        # ```
-
-        for next in str
-            if curr == '\n'
-                if !isspace(next) && next != ETX
-                    if prev == '\n'
-                        # Skip last newline in a sequence of sequential blank lines
-                    elseif !isspace(prev)
-                        # Replace a single newline with a space
-                        write(out, ' ')
-                    else
-                        num_newlines += 1
-                    end
-                else
-                    num_newlines += 1
-                end
-            elseif curr != '\0'
-                # Insert newlines which were determined to not be at the end of the string
-                if num_newlines > 0
-                    write(out, "\n" ^ num_newlines)
-                    num_newlines = 0
-                end
-
-                write(out, curr)
-            end
-
-            prev = curr
-            curr = next
-        end
-
-    # Keep newlines (literal)
+        str = replace(str, r"(?<=\S)\n(?=\S)" => " ")
+        str = replace(str, r"(?<=\n)\n(?=\S)" => "")
     elseif style === :literal
-        for next in str
-            if curr == '\n'
-                num_newlines += 1
-            elseif curr != '\0'
-                # Insert newlines which were determined to not be at the end of the string
-                if num_newlines > 0
-                    write(out, "\n" ^ num_newlines)
-                    num_newlines = 0
-                end
-
-                write(out, curr)
-            end
-
-            curr = next
-        end
+        # no-op
     else
         throw(ArgumentError("Unknown style indicator: $style"))
     end
 
-    # Single newline at end (clip)
     if chomp === :clip
-        num_newlines > 0 && write(out, '\n')
-
-    # No newline at end (strip)
+        if endswith(str, '\n')
+            str = rstrip(str, '\n') * '\n'
+        end
     elseif chomp === :strip
-        # no-op
-
-    # All newlines from end (keep)
+        str = rstrip(str, '\n')
     elseif chomp === :keep
-        write(out, "\n" ^ num_newlines)
+        # no-op
     else
         throw(ArgumentError("Unknown chomping indicator: $chomp"))
     end
 
-    return String(take!(out))
+    return str
 end
 
 """
