@@ -1,4 +1,4 @@
-using BlockScalars: BlockScalars, @m_str, multiline, interpolate
+using MultilineStrings: MultilineStrings, @m_str, multiline, interpolate
 using Test
 using YAML: YAML
 
@@ -30,7 +30,7 @@ for (test, str) in TEST_STRINGS
     @assert yaml_block(str, "|+") == str
 end
 
-@testset "BlockScalars.jl" begin
+@testset "MultilineStrings.jl" begin
     @testset "multiline" begin
         @testset "string: $test" for (test, str) in TEST_STRINGS
             expected_lk = yaml_block(str, "|+")

@@ -1,14 +1,14 @@
-using BlockScalars
+using MultilineStrings
 using Documenter
 
 makedocs(;
-    modules=[BlockScalars],
+    modules=[MultilineStrings],
     authors="Invenia Technical Computing Corporation",
-    repo="https://github.com/invenia/BlockScalars.jl/blob/{commit}{path}#L{line}",
-    sitename="BlockScalars.jl",
+    repo="https://github.com/invenia/MultilineStrings.jl/blob/{commit}{path}#L{line}",
+    sitename="MultilineStrings.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://invenia.github.io/BlockScalars.jl",
+        canonical="https://invenia.github.io/MultilineStrings.jl",
         assets=String[],
     ),
     pages=[
@@ -19,5 +19,5 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com/invenia/BlockScalars.jl",
+    repo="github.com/invenia/MultilineStrings.jl",
 )

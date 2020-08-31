@@ -1,4 +1,4 @@
-module BlockScalars
+module MultilineStrings
 
 export @m_str
 
