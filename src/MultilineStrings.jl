@@ -180,16 +180,29 @@ end
 """
     @m_str -> String
 
-Construct a multiline string according to the indicators listed after the ending quote:
+Construct a multiline string according to a style and chomp indicators (provided after the
+ending quote):
 
-- `f` replace newlines with spaces (folded)
-- `l` keep newlines (literal)
-- `s` no newlines at the end (strip)
-- `c` single newline at the end (clip)
-- `k` keep all newlines from the end (keep)
+- Style indicator:
+    - `f` replace newlines with spaces (folded)
+    - `l` keep newlines (literal)
+- Chomp indicator:
+    - `s` no newlines at the end (strip)
+    - `c` single newline at the end (clip)
+    - `k` keep all newlines from the end (keep)
 
 Note string interpolation is still respected any newlines added from interpolation will be
 also be processed.
+
+# Examples
+
+```jldoctest; setup = :(using MultilineStrings)
+julia> m\"\"\"
+       A string written
+       over multiple lines
+       \"\"\"
+"A string written over multiple lines"
+```
 """
 macro m_str(str::AbstractString, indicators::AbstractString="")
     parsed = interpolate(str)
