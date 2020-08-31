@@ -1,15 +1,15 @@
 module BlockScalars
 
-export @blk_str
+export @m_str
 
 const ETX = '\x03'  # ASCII control character: End of Text
 const DEFAULT_STYLE = :folded
 const DEFAULT_CHOMP = :strip
 
 """
-    block(str, style=$(repr(DEFAULT_STYLE)), chomp=$(repr(DEFAULT_CHOMP))) -> AbstractString
+    multiline(str, style=$(repr(DEFAULT_STYLE)), chomp=$(repr(DEFAULT_CHOMP))) -> AbstractString
 
-Revise a multiline string according to the provided `style` and `chomp`. Works similarly to
+Create a multiline string according to the provided `style` and `chomp`. Works similarly to
 YAML multiline strings (also known as block scalars).
 
 # Arguments
@@ -20,12 +20,12 @@ YAML multiline strings (also known as block scalars).
 - `chomp::Symbol`: No newlines at the end (`:strip`), single newline at the end (`:clip`),
   or keep all newlines from the end (`:keep`)
 """
-function block(str::AbstractString; style=DEFAULT_STYLE, chomp=DEFAULT_CHOMP)
-    block(str, style, chomp)
+function multiline(str::AbstractString; style=DEFAULT_STYLE, chomp=DEFAULT_CHOMP)
+    multiline(str, style, chomp)
 end
 
 """
-    block(str, indicators) -> AbstractString
+    multiline(str, indicators) -> AbstractString
 
 Revise a multiline string according to the provided style and chomp encoded in the
 `indicators` string.
@@ -42,7 +42,7 @@ Revise a multiline string according to the provided style and chomp encoded in t
     - "lc" / "|": literal and clip
     - "lk" / "|+": literal and keep
 """
-function block(str::AbstractString, indicators::AbstractString)
+function multiline(str::AbstractString, indicators::AbstractString)
     indicators_len = length(indicators)
     indicators_len > 2 && throw(ArgumentError("Too many indicators provided"))
 
@@ -75,7 +75,7 @@ function block(str::AbstractString, indicators::AbstractString)
     elseif style_char == '\0'
         DEFAULT_STYLE
     else
-        throw(ArgumentError("Unknown block style indicator: $(repr(style_char))"))
+        throw(ArgumentError("Unknown style indicator: $(repr(style_char))"))
     end
 
     chomp = if chomp_char == 'c' || yaml_chomp
@@ -87,13 +87,13 @@ function block(str::AbstractString, indicators::AbstractString)
     elseif chomp_char == '\0'
         DEFAULT_CHOMP
     else
-        throw(ArgumentError("Unknown block chomping indicator: $(repr(chomp_char))"))
+        throw(ArgumentError("Unknown chomping indicator: $(repr(chomp_char))"))
     end
 
-    return block(str, style, chomp)
+    return multiline(str, style, chomp)
 end
 
-function block(str::AbstractString, style::Symbol, chomp::Symbol)
+function multiline(str::AbstractString, style::Symbol, chomp::Symbol)
     # Append an additional, non-space, character to force one more iteration of the style
     # loop
     str *= ETX
@@ -156,7 +156,7 @@ function block(str::AbstractString, style::Symbol, chomp::Symbol)
             curr = next
         end
     else
-        throw(ArgumentError("Unknown block style indicator: $style"))
+        throw(ArgumentError("Unknown style indicator: $style"))
     end
 
     # Single newline at end (clip)
@@ -171,14 +171,14 @@ function block(str::AbstractString, style::Symbol, chomp::Symbol)
     elseif chomp === :keep
         write(out, "\n" ^ num_newlines)
     else
-        throw(ArgumentError("Unknown block chomping indicator: $chomp"))
+        throw(ArgumentError("Unknown chomping indicator: $chomp"))
     end
 
     return String(take!(out))
 end
 
 """
-    @blk_str -> String
+    @m_str -> String
 
 Construct a multiline string according to the indicators listed after the ending quote:
 
@@ -191,7 +191,7 @@ Construct a multiline string according to the indicators listed after the ending
 Note string interpolation is still respected any newlines added from interpolation will be
 also be processed.
 """
-macro blk_str(str::AbstractString, indicators::AbstractString="")
+macro m_str(str::AbstractString, indicators::AbstractString="")
     parsed = interpolate(str)
 
     # When no string interpolation needs to take place we can just process the multiline
@@ -199,9 +199,9 @@ macro blk_str(str::AbstractString, indicators::AbstractString="")
     # the multiline string at runtime so that we can process after interpolation has taken
     # place.
     result = if parsed isa String
-        block(unescape_string(parsed), indicators)
+        multiline(unescape_string(parsed), indicators)
     else
-        Expr(:call, :(BlockScalars.block), parsed, indicators)
+        Expr(:call, :(MultilineStrings.multiline), parsed, indicators)
     end
 
     return esc(result)
