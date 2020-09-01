@@ -28,7 +28,7 @@ jobs:
           Pkg.develop(PackageSpec(path=pwd()))
           Pkg.instantiate()
           using Documenter: doctest
-          using BlockScalars
-          doctest(BlockScalars)
+          using MultilineStrings
+          doctest(MultilineStrings)
           include("docs/make.jl")'
       after_success: skip

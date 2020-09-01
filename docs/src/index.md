@@ -1,12 +1,12 @@
 ```@meta
-CurrentModule = BlockScalars
+CurrentModule = MultilineStrings
 ```
 
-# BlockScalars
+# MultilineStrings
 
 ```@index
 ```
 
 ```@autodocs
-Modules = [BlockScalars]
+Modules = [MultilineStrings]
 ```

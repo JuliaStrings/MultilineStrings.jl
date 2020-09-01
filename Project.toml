@@ -1,4 +1,4 @@
-name = "BlockScalars"
+name = "MultilineStrings"
 uuid = "1e8d2bf6-9821-4900-9a2f-4d87552df2bd"
 authors = ["Invenia Technical Computing Corporation"]
 version = "0.1.0"
@@ -8,6 +8,7 @@ julia = "1"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
 
 [targets]
-test = ["Test"]
+test = ["Test", "YAML"]

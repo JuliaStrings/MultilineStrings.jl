@@ -3,7 +3,7 @@
 [[Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
-[[BlockScalars]]
+[[MultilineStrings]]
 path = ".."
 uuid = "1e8d2bf6-9821-4900-9a2f-4d87552df2bd"
 version = "0.1.0"
