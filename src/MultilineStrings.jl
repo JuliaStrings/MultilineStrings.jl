@@ -1,6 +1,6 @@
 module MultilineStrings
 
-export @m_str
+export @m_str, multiline
 
 const DEFAULT_STYLE = :folded
 const DEFAULT_CHOMP = :strip
