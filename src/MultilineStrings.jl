@@ -43,53 +43,7 @@ Revise a multiline string according to the provided style and chomp encoded in t
     - "lk" / "|+": literal and keep
 """
 function multiline(str::AbstractString, indicators::AbstractString)
-    indicators_len = length(indicators)
-    indicators_len > 2 && throw(ArgumentError("Too many indicators provided"))
-
-    # Note: Using '\0` to indicate undefined
-    yaml_chomp = false
-    style_char, chomp_char = if indicators_len == 2
-        indicators
-    elseif indicators_len == 1
-        ind = indicators[1]
-        if ind in ('f', 'l')
-            ind, '\0'
-        elseif ind in ('>', '|')
-            yaml_chomp = true
-            ind, '\0'
-        else
-            '\0', ind
-        end
-    else
-        '\0', '\0'
-    end
-
-    if style_char != '\0' && chomp_char != '\0' && isletter(style_char) ⊻ isletter(chomp_char)
-        throw(ArgumentError("Can't mix YAML style block indicators with letter indicators"))
-    end
-
-    style = if style_char == 'f' || style_char == '>'
-        :folded
-    elseif style_char == 'l' || style_char == '|'
-        :literal
-    elseif style_char == '\0'
-        DEFAULT_STYLE
-    else
-        throw(ArgumentError("Unknown style indicator: $(repr(style_char))"))
-    end
-
-    chomp = if chomp_char == 'c' || yaml_chomp
-        :clip
-    elseif chomp_char == 's' || chomp_char == '-'
-        :strip
-    elseif chomp_char == 'k' || chomp_char == '+'
-        :keep
-    elseif chomp_char == '\0'
-        DEFAULT_CHOMP
-    else
-        throw(ArgumentError("Unknown chomping indicator: $(repr(chomp_char))"))
-    end
-
+    style, chomp = _process_indicators(indicators)
     return multiline(str, style, chomp)
 end
 
@@ -148,6 +102,7 @@ julia> m\"\"\"
 ```
 """
 macro m_str(str::AbstractString, indicators::AbstractString="")
+    style, chomp = _process_indicators(indicators)
     parsed = interpolate(str)
 
     # When no string interpolation needs to take place we can just process the multiline
@@ -155,9 +110,9 @@ macro m_str(str::AbstractString, indicators::AbstractString="")
     # the multiline string at runtime so that we can process after interpolation has taken
     # place.
     result = if parsed isa String
-        multiline(unescape_string(parsed), indicators)
+        multiline(unescape_string(parsed), style, chomp)
     else
-        Expr(:call, :(MultilineStrings.multiline), parsed, indicators)
+        Expr(:call, :(MultilineStrings.multiline), parsed, QuoteNode(style), QuoteNode(chomp))
     end
 
     return esc(result)
@@ -191,6 +146,57 @@ function interpolate(str::AbstractString)
     start <= ending && push!(components, SubString(str, start, ending))
 
     return Expr(:string, components...)
+end
+
+function _process_indicators(indicators::AbstractString)
+    indicators_len = length(indicators)
+    indicators_len > 2 && throw(ArgumentError("Too many indicators provided"))
+
+    # Note: Using '\0` to indicate undefined
+    yaml_chomp = false
+    style_char, chomp_char = if indicators_len == 2
+        indicators
+    elseif indicators_len == 1
+        ind = indicators[1]
+        if ind in ('f', 'l')
+            ind, '\0'
+        elseif ind in ('>', '|')
+            yaml_chomp = true
+            ind, '\0'
+        else
+            '\0', ind
+        end
+    else
+        '\0', '\0'
+    end
+
+    if style_char != '\0' && chomp_char != '\0' && isletter(style_char) ⊻ isletter(chomp_char)
+        throw(ArgumentError("Can't mix YAML style block indicators with letter indicators"))
+    end
+
+    style = if style_char == 'f' || style_char == '>'
+        :folded
+    elseif style_char == 'l' || style_char == '|'
+        :literal
+    elseif style_char == '\0'
+        DEFAULT_STYLE
+    else
+        throw(ArgumentError("Unknown style indicator: $(repr(style_char))"))
+    end
+
+    chomp = if chomp_char == 'c' || yaml_chomp
+        :clip
+    elseif chomp_char == 's' || chomp_char == '-'
+        :strip
+    elseif chomp_char == 'k' || chomp_char == '+'
+        :keep
+    elseif chomp_char == '\0'
+        DEFAULT_CHOMP
+    else
+        throw(ArgumentError("Unknown chomping indicator: $(repr(chomp_char))"))
+    end
+
+    return style, chomp
 end
 
 end
