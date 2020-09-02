@@ -6,10 +6,10 @@ const DEFAULT_STYLE = :folded
 const DEFAULT_CHOMP = :strip
 
 """
-    multiline(str, style=$(repr(DEFAULT_STYLE)), chomp=$(repr(DEFAULT_CHOMP))) -> AbstractString
+    multiline(str; style=$(repr(DEFAULT_STYLE)), chomp=$(repr(DEFAULT_CHOMP))) -> AbstractString
 
-Create a multiline string according to the provided `style` and `chomp`. Works similarly to
-YAML multiline strings (also known as block scalars).
+Manipulate a multiline string according to the provided `style` and `chomp`. Works similarly
+to YAML multiline strings (also known as block scalars).
 
 # Arguments
 - `str::AbstractString`: The multiline string to be processed
@@ -26,7 +26,7 @@ end
 """
     multiline(str, indicators) -> AbstractString
 
-Revise a multiline string according to the provided style and chomp encoded in the
+Manipulate a multiline string according to the provided style and chomp encoded in the
 `indicators` string.
 
 # Arguments
