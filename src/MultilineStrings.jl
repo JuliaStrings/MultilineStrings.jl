@@ -2,7 +2,6 @@ module MultilineStrings
 
 export @m_str
 
-const ETX = '\x03'  # ASCII control character: End of Text
 const DEFAULT_STYLE = :folded
 const DEFAULT_CHOMP = :strip
 
