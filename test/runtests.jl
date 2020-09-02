@@ -23,6 +23,7 @@ const TEST_STRINGS = [
         """,
     "whitespace" => "a\nb\n c \nd\n",
     "no ending newline" => "foo",
+    "starting newline" => "\nbar",
 ]
 
 # Validate `yaml_block` function
