@@ -1,3 +1,5 @@
+using Documenter: doctest
+using MultilineStrings
 using MultilineStrings: MultilineStrings, @m_str, multiline, interpolate
 using Test
 using YAML: YAML
@@ -25,6 +27,8 @@ const TEST_STRINGS = [
     "no ending newline" => "foo",
     "starting newline" => "\nbar",
 ]
+
+doctest(MultilineStrings)
 
 # Validate `yaml_block` function
 for (test, str) in TEST_STRINGS
