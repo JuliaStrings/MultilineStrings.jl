@@ -13,7 +13,7 @@ Tooling for manipulating multiline strings.
 The package features support for:
 
 - Multiline string literals (`@m_str`, `multiline`)
-- A indent function which only indents non-blank lines (`indent`)
+- An indent function which only indents non-blank lines (`indent`)
 
 ### Multiline String Literal
 
