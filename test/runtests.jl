@@ -1,10 +1,8 @@
 using Documenter: doctest
 using MultilineStrings
-using MultilineStrings: MultilineStrings, @m_str, multiline, interpolate
+using MultilineStrings: MultilineStrings, @m_str, indent, interpolate, multiline
 using Test
 using YAML: YAML
-
-indent(str, n) = join(map(line -> (" " ^ n) * line, split(str, '\n')), '\n')
 
 function yaml_block(str, block_scalar)
     yaml = "example: $block_scalar\n$(indent(str, 2))"
@@ -27,8 +25,6 @@ const TEST_STRINGS = [
     "no ending newline" => "foo",
     "starting newline" => "\nbar",
 ]
-
-doctest(MultilineStrings)
 
 # Validate `yaml_block` function
 for (test, str) in TEST_STRINGS
@@ -147,4 +143,8 @@ end
             @test m"""$(join(("a", "b") .* "\n", ""))"""fc == "a b\n"
         end
     end
+
+    include("indent.jl")
+
+    doctest(MultilineStrings)
 end

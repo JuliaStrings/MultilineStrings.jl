@@ -1,6 +1,6 @@
 module MultilineStrings
 
-export @m_str, multiline
+export @m_str, indent, multiline
 
 const DEFAULT_STYLE = :folded
 const DEFAULT_CHOMP = :strip
@@ -197,5 +197,7 @@ function _process_indicators(indicators::AbstractString)
 
     return style, chomp
 end
+
+include("indent.jl")
 
 end
