@@ -10,7 +10,14 @@ Tooling for manipulating multiline strings.
 
 ## Features
 
-The package features a multiline string literal (`@m_str`), inspired from [YAML's block scalars](https://yaml-multiline.info/), which provide options for manipulating multiline string literals via a style and chomp indicator:
+The package features support for:
+
+- Multiline string literals (`@m_str`, `multiline`)
+- A indent function which only indents non-blank lines (`indent`)
+
+### Multiline String Literal
+
+The multiline string literal (`@m_str`), inspired from [YAML's block scalars](https://yaml-multiline.info/), which provide options for manipulating multiline string literals via a style and chomp indicator:
 
 - Style indicator:
     - `f` replace newlines with spaces (folded)
@@ -23,7 +30,7 @@ The package features a multiline string literal (`@m_str`), inspired from [YAML'
 The indicators are provided after the ending quote of the string (e.g. `m"hello\nworld!"fc`).
 If no indicators are provided the default behaviour is folded/strip.
 
-## Example
+#### Example
 
 When writing a long string literal you may want to break the string up over multiple lines in the code, to make it easier to read, but have the string be printed as a single line.
 Specifically, when writing an long error message you may want to break up the string over multiple lines:
@@ -54,3 +61,19 @@ with the non-magical computation occurring on this device.
 ```
 
 Take note that a Julia [triple-quoted string literal](https://docs.julialang.org/en/v1/manual/strings/#Triple-Quoted-String-Literals) will leave most newlines in place.
+
+### Indent
+
+The `indent` function will indent non-empty lines of a string by a number of spaces.
+
+```julia
+julia> str = """
+           A blank line:
+
+           plus another line at the end.
+           """
+"A blank line:\n\nplus another line at the end.\n"
+
+julia> indent(str, 4)
+"    A blank line:\n\n    plus another line at the end.\n"
+```
