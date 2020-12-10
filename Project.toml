@@ -1,7 +1,7 @@
 name = "MultilineStrings"
 uuid = "1e8d2bf6-9821-4900-9a2f-4d87552df2bd"
 authors = ["Invenia Technical Computing Corporation"]
-version = "0.1.0"
+version = "0.1.1"
 
 [compat]
 Documenter = "0.23, 0.24"
