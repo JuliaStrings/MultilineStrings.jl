@@ -12,7 +12,7 @@ julia> indent("  a\\n  \\n  b", 2)
 "    a\\n  \\n    b"
 ```
 
-See also `Base.unintent` and `Base.indentation`.
+See also `Base.unindent` and `Base.indentation`.
 """
 function indent(str::AbstractString, n::Int)
     n == 0 && return str
