@@ -22,7 +22,8 @@ function indent(str::AbstractString, n::Int)
 
     line_start = firstindex(str)
     blank_line = true
-    for (i, ch) in enumerate(str)
+    for i in eachindex(str)
+        ch = str[i]
         if ch == '\n'
             !blank_line && print(buf, indent_str)
             print(buf, SubString(str, line_start, i))

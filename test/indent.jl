@@ -5,4 +5,6 @@
 
     @test indent("a", 4) == "    a"
     @test indent("a\n\nb", 4) == "    a\n\n    b"
+
+    @test indent("三\nb", 4) == "    三\n    b"
 end
