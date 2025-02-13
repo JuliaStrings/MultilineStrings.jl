@@ -1,23 +1,18 @@
 using MultilineStrings
 using Documenter
 
+const IS_CI = get(ENV, "CI", nothing) == "true"
+
 makedocs(;
     modules=[MultilineStrings],
-    authors="Invenia Technical Computing Corporation",
-    repo="https://github.com/JuliaStrings/MultilineStrings.jl/blob/{commit}{path}#L{line}",
-    sitename="MultilineStrings.jl",
-    format=Documenter.HTML(;
-        prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://juliastrings.github.io/MultilineStrings.jl",
-        assets=String[],
-    ),
+    format=Documenter.HTML(prettyurls=IS_CI),
     pages=[
         "Home" => "index.md",
     ],
-    strict=true,
+    sitename="MultilineStrings.jl",
     checkdocs=:exports,
+    linkcheck=true,
+    doctest=true,
 )
 
-deploydocs(;
-    repo="github.com/JuliaStrings/MultilineStrings.jl",
-)
+IS_CI && deploydocs(; repo="github.com/JuliaStrings/MultilineStrings.jl")

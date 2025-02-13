@@ -1,4 +1,3 @@
-using Documenter: doctest
 using MultilineStrings
 using MultilineStrings: MultilineStrings, @m_str, indent, interpolate, multiline
 using Test
@@ -145,6 +144,4 @@ end
     end
 
     include("indent.jl")
-
-    doctest(MultilineStrings)
 end
