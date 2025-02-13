@@ -1,16 +1,29 @@
+---
 name: CompatHelper
 on:
   schedule:
-    - cron: '0 0 * * *'  # Everyday at midnight
+    - cron: "0 0 * * *"  # Everyday at midnight
   workflow_dispatch:
 jobs:
   CompatHelper:
+    permissions:
+      contents: write
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
-      - name: Pkg.add("CompatHelper")
-        run: julia -e 'using Pkg; Pkg.add("CompatHelper")'
-      - name: CompatHelper.main()
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: "1"
+      - uses: julia-actions/cache@v2
+      - name: Install CompatHelper
+        shell: julia --color=yes {0}
+        run: |
+          using Pkg
+          Pkg.add(PackageSpec(name="CompatHelper", version="3")
+      - name: Run CompatHelper
+        run: |
+          using CompatHelper
+          CompatHelper.main()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COMPATHELPER_PRIV: ${{ secrets.DOCUMENTER_KEY }}
-        run: julia -e 'using CompatHelper; CompatHelper.main()'

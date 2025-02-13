@@ -1,29 +1,36 @@
+---
 name: JuliaNightly
-# Nightly Scheduled Julia Nightly Run
 on:
   schedule:
-    - cron: '0 2 * * *'  # Daily at 2 AM UTC (8 PM CST)
+    - cron: "0 2 * * *"  # Daily at 2 AM UTC (8 PM CST)
 jobs:
   test:
-    name: Julia Nightly - Ubuntu - x64
+    name: Julia nightly - ubuntu-latest - x64
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: julia-actions/setup-julia@v1
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
         with:
           version: nightly
           arch: x64
-      - uses: actions/cache@v2
-        env:
-          cache-name: julia-nightly-cache-artifacts
-        with:
-          path: ~/.julia/artifacts
-          key: ${{ env.cache-name }}-${{ hashFiles('**/Project.toml') }}
-          restore-keys: |
-            ${{ env.cache-name }}-
-      - uses: julia-actions/julia-buildpkg@latest
-      - uses: julia-actions/julia-runtest@latest
+      - uses: julia-actions/cache@v2
+      - uses: julia-actions/julia-buildpkg@v1
+      - uses: julia-actions/julia-runtest@v1
       - uses: julia-actions/julia-processcoverage@v1
-      - uses: codecov/codecov-action@v1
+      - uses: codecov/codecov-action@v5
         with:
-          file: lcov.info
+          files: lcov.info
+
+  # Work around having GitHub suspend the scheduled workflow if there is no commit activity
+  # for the past 60 days. As this repo doesn't get much activity beyond artifact updates
+  # this can be quite annoying.
+  keepalive:
+    name: Keepalive
+    runs-on: ubuntu-latest
+    # These permissions are needed to:
+    # - Keep the workflow alive: https://github.com/marketplace/actions/keepalive-workflow#github-api-keepalive-workflow---default-for-github-actions-users
+    permissions:
+      actions: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gautamkrishnar/keepalive-workflow@v2
