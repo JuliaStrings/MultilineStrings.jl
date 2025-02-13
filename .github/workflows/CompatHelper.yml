@@ -24,6 +24,7 @@ jobs:
           using Pkg
           Pkg.add(PackageSpec(name="CompatHelper", version="3"))
       - name: Run CompatHelper
+        shell: julia --color=yes {0}
         run: |
           using CompatHelper
           CompatHelper.main()
