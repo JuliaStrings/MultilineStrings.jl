@@ -1,3 +1,6 @@
 [deps]
 MultilineStrings = "1e8d2bf6-9821-4900-9a2f-4d87552df2bd"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+
+[compat]
+Documenter = "1"

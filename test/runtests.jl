@@ -1,4 +1,4 @@
-using Documenter: doctest
+using Aqua: Aqua
 using MultilineStrings
 using MultilineStrings: MultilineStrings, @m_str, indent, interpolate, multiline
 using Test
@@ -32,6 +32,10 @@ for (test, str) in TEST_STRINGS
 end
 
 @testset "MultilineStrings.jl" begin
+    @testset "Aqua" begin
+        Aqua.test_all(MultilineStrings)
+    end
+
     @testset "multiline" begin
         @testset "string: $test" for (test, str) in TEST_STRINGS
             expected_lk = yaml_block(str, "|+")
@@ -145,6 +149,4 @@ end
     end
 
     include("indent.jl")
-
-    doctest(MultilineStrings)
 end
