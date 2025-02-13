@@ -22,7 +22,7 @@ jobs:
         shell: julia --color=yes {0}
         run: |
           using Pkg
-          Pkg.add(PackageSpec(name="CompatHelper", version="3")
+          Pkg.add(PackageSpec(name="CompatHelper", version="3"))
       - name: Run CompatHelper
         run: |
           using CompatHelper
