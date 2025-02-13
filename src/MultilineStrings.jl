@@ -34,12 +34,14 @@ Manipulate a multiline string according to the provided style and chomp encoded 
 - `indicators::AbstractString`: A terse string representing the style and chomp. Indicators
   can be either in letter-form or in YAML-form:
 
-    - "fs" / ">-": folded and strip
-    - "fc" / ">": folded and clip
-    - "fk" / ">+": folded and keep
-    - "ls" / "|-": literal and strip
-    - "lc" / "|": literal and clip
-    - "lk" / "|+": literal and keep
+    - `fs` / `>-`: folded and strip
+    - `fc` / `>`: folded and clip
+    - `fk` / `>+`: folded and keep
+    - `ls` / `|-`: literal and strip
+    - `lc` / `|`: literal and clip
+    - `lk` / `|"`: literal and keep
+
+See [https://yaml-multiline.info](https://yaml-multiline.info) for more details.
 """
 function multiline(str::AbstractString, indicators::AbstractString)
     style, chomp = _process_indicators(indicators)
@@ -89,6 +91,8 @@ If both a style and chomp indicator is provided the style indicator must be spec
 
 Note string interpolation is still respected any newlines added from interpolation will be
 also be processed.
+
+See [https://yaml-multiline.info](https://yaml-multiline.info) for more details.
 
 # Examples
 
