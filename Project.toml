@@ -1,7 +1,7 @@
 name = "MultilineStrings"
 uuid = "1e8d2bf6-9821-4900-9a2f-4d87552df2bd"
 authors = ["Invenia Technical Computing Corporation"]
-version = "0.1.1"
+version = "1.0.0"
 
 [compat]
 Aqua = "0.8.11"
