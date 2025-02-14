@@ -4,6 +4,9 @@ on:
   issue_comment:
     types:
       - created
+  pull_request:
+    paths:
+      - ".github/workflows/TagBot.yml"
   workflow_dispatch:
 permissions:
   actions: read
