@@ -5,10 +5,8 @@ const IS_CI = get(ENV, "CI", nothing) == "true"
 
 makedocs(;
     modules=[MultilineStrings],
-    format=Documenter.HTML(prettyurls=IS_CI),
-    pages=[
-        "Home" => "index.md",
-    ],
+    format=Documenter.HTML(; prettyurls=IS_CI),
+    pages=["Home" => "index.md"],
     sitename="MultilineStrings.jl",
     checkdocs=:exports,
     linkcheck=true,
