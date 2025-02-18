@@ -29,3 +29,4 @@ jobs:
         if: ${{ !cancelled() && github.event_name == 'pull_request' && github.event.pull_request.draft == false }}
         with:
           tool_name: JuliaFormatter
+          filter_mode: nofilter  # Post results on all results and not just changed files: https://github.com/reviewdog/reviewdog#filter-mode
