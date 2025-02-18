@@ -5,6 +5,7 @@ on:
     types: [opened, reopened, synchronize, labeled, unlabeled]
     paths:
       - "**/*.jl"
+      - ".github/workflows/Format.yml"
 jobs:
   code-style:
     runs-on: ubuntu-latest
