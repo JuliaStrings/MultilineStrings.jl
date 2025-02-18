@@ -6,7 +6,7 @@ using YAML: YAML
 
 function yaml_block(str, block_scalar)
     yaml = "example: $block_scalar\n$(indent(str, 2))"
-    YAML.load(yaml)["example"]
+    return YAML.load(yaml)["example"]
 end
 
 const TEST_STRINGS = [
@@ -51,9 +51,9 @@ end
                 @test multiline(str, :literal, :clip) == expected_lc
                 @test multiline(str, :literal, :strip) == expected_ls
 
-                @test multiline(str, style=:literal, chomp=:keep) == expected_lk
-                @test multiline(str, style=:literal, chomp=:clip) == expected_lc
-                @test multiline(str, style=:literal, chomp=:strip) == expected_ls
+                @test multiline(str; style=:literal, chomp=:keep) == expected_lk
+                @test multiline(str; style=:literal, chomp=:clip) == expected_lc
+                @test multiline(str; style=:literal, chomp=:strip) == expected_ls
 
                 @test multiline(str, "lk") == expected_lk
                 @test multiline(str, "lc") == expected_lc
@@ -68,9 +68,9 @@ end
                 @test multiline(str, :folded, :clip) == expected_fc
                 @test multiline(str, :folded, :strip) == expected_fs
 
-                @test multiline(str, style=:folded, chomp=:keep) == expected_fk
-                @test multiline(str, style=:folded, chomp=:clip) == expected_fc
-                @test multiline(str, style=:folded, chomp=:strip) == expected_fs
+                @test multiline(str; style=:folded, chomp=:keep) == expected_fk
+                @test multiline(str; style=:folded, chomp=:clip) == expected_fc
+                @test multiline(str; style=:folded, chomp=:strip) == expected_fs
 
                 @test multiline(str, "fk") == expected_fk
                 @test multiline(str, "fc") == expected_fc
@@ -81,8 +81,8 @@ end
             end
 
             @testset "default chomp" begin
-                @test multiline(str, style=:literal) == expected_ls
-                @test multiline(str, style=:folded) == expected_fs
+                @test multiline(str; style=:literal) == expected_ls
+                @test multiline(str; style=:folded) == expected_fs
 
                 @test multiline(str, "l") == expected_ls
                 @test multiline(str, "f") == expected_fs
@@ -92,9 +92,9 @@ end
             end
 
             @testset "default style" begin
-                @test multiline(str, chomp=:keep) == expected_fk
-                @test multiline(str, chomp=:clip) == expected_fc
-                @test multiline(str, chomp=:strip) == expected_fs
+                @test multiline(str; chomp=:keep) == expected_fk
+                @test multiline(str; chomp=:clip) == expected_fc
+                @test multiline(str; chomp=:strip) == expected_fs
 
                 @test multiline(str, "k") == expected_fk
                 @test multiline(str, "c") == expected_fc
@@ -131,7 +131,8 @@ end
         # The quoting in these examples can result in exceptions being raised during parsing
         # if handled incorrectly.
         @test interpolate("\"\\n\"") == "\"\\n\""
-        @test interpolate("\$(join([\"a\", \"b\"], \", \"))") == Expr(:string, :(join(["a", "b"], ", ")))
+        @test interpolate("\$(join([\"a\", \"b\"], \", \"))") ==
+            Expr(:string, :(join(["a", "b"], ", ")))
     end
 
     @testset "@m_str" begin

@@ -20,7 +20,7 @@ to YAML multiline strings (also known as block scalars).
   or keep all newlines from the end (`:keep`)
 """
 function multiline(str::AbstractString; style=DEFAULT_STYLE, chomp=DEFAULT_CHOMP)
-    multiline(str, style, chomp)
+    return multiline(str, style, chomp)
 end
 
 """
@@ -173,7 +173,12 @@ function _process_indicators(indicators::AbstractString)
         '\0', '\0'
     end
 
-    if style_char != '\0' && chomp_char != '\0' && isletter(style_char) ⊻ isletter(chomp_char)
+    mixed_indicators = (
+        style_char != '\0' &&
+        chomp_char != '\0' &&
+        isletter(style_char) ⊻ isletter(chomp_char)
+    )
+    if mixed_indicators
         throw(ArgumentError("Can't mix YAML style block indicators with letter indicators"))
     end
 
