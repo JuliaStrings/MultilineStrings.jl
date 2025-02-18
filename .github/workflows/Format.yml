@@ -1,8 +1,8 @@
 ---
+# Ideally would use https://github.com/julia-actions/julia-format in the future
 name: Format
 on:
   pull_request:
-    types: [opened, reopened, synchronize, labeled, unlabeled]
     paths:
       - "**/*.jl"
       - ".github/workflows/Format.yml"
@@ -10,6 +10,21 @@ jobs:
   code-style:
     runs-on: ubuntu-latest
     steps:
-      - uses: julia-actions/julia-format@v3
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+      - uses: julia-actions/cache@v2
+      - name: Install JuliaFormatter
+        shell: julia --color=yes {0}
+        run: |
+          import Pkg
+          Pkg.add("JuliaFormatter@1")
+      - name: Check formatting
+        shell: julia --color=yes {0}
+        run: |
+          using JuliaFormatter
+          format(".") || exit(1)
+      # Add formatting suggestions to non-draft PRs even if when "Check formatting" fails
+      - uses: reviewdog/action-suggester@a3026c6020837c23b61a79d12db223a00df19e6a # v1.19.0
+        if: ${{ !cancelled() && github.event_name == 'pull_request' && github.event.pull_request.draft == false }}
         with:
-          version: "1"
+          tool_name: JuliaFormatter
