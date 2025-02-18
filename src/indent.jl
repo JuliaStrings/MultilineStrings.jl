@@ -17,8 +17,8 @@ See also `Base.unindent` and `Base.indentation`.
 function indent(str::AbstractString, n::Int)
     n == 0 && return str
     # Note: this loses the type of the original string
-    buf = IOBuffer(; sizehint=sizeof(str))
-    indent_str = ' '^n
+    buf = IOBuffer(sizehint=sizeof(str))
+    indent_str = ' ' ^ n
 
     line_start = firstindex(str)
     blank_line = true
@@ -38,5 +38,5 @@ function indent(str::AbstractString, n::Int)
     !blank_line && print(buf, indent_str)
     print(buf, SubString(str, line_start, lastindex(str)))
 
-    return String(take!(buf))
+    String(take!(buf))
 end
