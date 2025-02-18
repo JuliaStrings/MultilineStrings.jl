@@ -36,8 +36,15 @@ jobs:
         with:
           files: lcov.info
 
+  # https://documenter.juliadocs.org/stable/man/hosting/#GitHub-Actions
   docs:
     name: Documentation
+    # These permissions are needed to:
+    # - Use deploy the documentation: https://documenter.juliadocs.org/stable/man/hosting/#Permissions
+    permissions:
+      contents: write
+      pull-requests: read
+      statuses: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
